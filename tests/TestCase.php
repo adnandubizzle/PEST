@@ -3,13 +3,10 @@
 namespace Tests;
 
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 
 abstract class TestCase extends BaseTestCase
 {
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this->withoutVite();
-    }
+    // use CreatesApplication;
+    use LazilyRefreshDatabase;  //wont hit db for every test case, only when required.sw
 }
