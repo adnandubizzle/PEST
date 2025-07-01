@@ -1,25 +1,27 @@
 <?php
 
+use App\Models\Contact;
+use Illuminate\Foundation\Testing\WithFaker;
 
-uses(Illuminate\Foundation\Testing\WithFaker::class);
+uses(WithFaker::class);
+it('can store a contact', function ($email) {
+    $faker = fake();
+    login()->post('/contacts', [
+        'first_name' => $faker->firstName,
+        'last_name' => $faker->lastName,
+        'email' => $email,
+        'phone' => '+9237457384',
+        'address' => '1 Test Street',
+        'city' => 'TesterField',
+        'region' => 'Derby shire',
+        'country' => $faker->randomElement(['us', 'ca']),
+        'postal_code' => $faker->postcode,
+    ])->assertRedirect('/contacts')->assertSessionHas('success', 'Contact created.');
 
-it('can store a contact', function () {
-    $user = \App\Models\User::factory()->create([
-        'account_id' => \App\Models\Account::factory()->create()->id,
-    ]);
+    $contact = \App\Models\Contact::latest()->first();
 
-    $this->actingAs($user)
-        ->post('/contacts', [
-            'first_name' => $this->faker->firstName,
-            'last_name' => $this->faker->lastName,
-            'email' => $this->faker->email,
-            'phone' => $this->faker->phoneNumber,
-            'address' => '1 Test Street',
-            'city' => 'Testerfield',
-            'region' => 'Derbyshire',
-            'country' => $this->faker->randomElement(['us', 'ca']),
-            'postal_code' => $this->faker->postcode,
-        ])
-        ->assertRedirect('/contacts')
-        ->assertSessionHas('success', 'Contact created');
-});
+    expect($contact->first_name)->toBeString()->not->toBeEmpty();
+    expect($contact->last_name)->toBeString()->not->toBeEmpty();
+    expect($contact->city)->toBe('TesterField');
+    expect($contact->phone)->toBePhoneNumber();
+})->with('valid emails');
