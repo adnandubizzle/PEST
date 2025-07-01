@@ -1,19 +1,19 @@
+
 <?php
 
 namespace App\Http\Controllers;
 
 use App\Models\Contact;
-use Illuminate\Http\RedirectResponse;
+use App\Rules\IsValidEmailAddress;
+use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
-use Illuminate\Support\Facades\Request;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
-use Inertia\Response;
 
 class ContactsController extends Controller
 {
-    public function index(): Response
+    public function index()
     {
         return Inertia::render('Contacts/Index', [
             'filters' => Request::all('search', 'trashed'),
@@ -23,7 +23,7 @@ class ContactsController extends Controller
                 ->filter(Request::only('search', 'trashed'))
                 ->paginate(10)
                 ->withQueryString()
-                ->through(fn ($contact) => [
+                ->through(fn($contact) => [
                     'id' => $contact->id,
                     'name' => $contact->name,
                     'phone' => $contact->phone,
@@ -34,7 +34,7 @@ class ContactsController extends Controller
         ]);
     }
 
-    public function create(): Response
+    public function create()
     {
         return Inertia::render('Contacts/Create', [
             'organizations' => Auth::user()->account
@@ -46,15 +46,18 @@ class ContactsController extends Controller
         ]);
     }
 
-    public function store(): RedirectResponse
+    public function store()
     {
         Auth::user()->account->contacts()->create(
             Request::validate([
                 'first_name' => ['required', 'max:50'],
                 'last_name' => ['required', 'max:50'],
-                'organization_id' => ['nullable', Rule::exists('organizations', 'id')->where(function ($query) {
-                    $query->where('account_id', Auth::user()->account_id);
-                })],
+                'organization_id' => [
+                    'nullable',
+                    Rule::exists('organizations', 'id')->where(function ($query) {
+                        $query->where('account_id', Auth::user()->account_id);
+                    })
+                ],
                 'email' => ['nullable', 'max:50', 'email'],
                 'phone' => ['nullable', 'max:50'],
                 'address' => ['nullable', 'max:150'],
@@ -68,7 +71,7 @@ class ContactsController extends Controller
         return Redirect::route('contacts')->with('success', 'Contact created.');
     }
 
-    public function edit(Contact $contact): Response
+    public function edit(Contact $contact)
     {
         return Inertia::render('Contacts/Edit', [
             'contact' => [
@@ -93,7 +96,7 @@ class ContactsController extends Controller
         ]);
     }
 
-    public function update(Contact $contact): RedirectResponse
+    public function update(Contact $contact)
     {
         $contact->update(
             Request::validate([
@@ -101,7 +104,7 @@ class ContactsController extends Controller
                 'last_name' => ['required', 'max:50'],
                 'organization_id' => [
                     'nullable',
-                    Rule::exists('organizations', 'id')->where(fn ($query) => $query->where('account_id', Auth::user()->account_id)),
+                    Rule::exists('organizations', 'id')->where(fn($query) => $query->where('account_id', Auth::user()->account_id)),
                 ],
                 'email' => ['nullable', 'max:50', 'email'],
                 'phone' => ['nullable', 'max:50'],
@@ -116,14 +119,14 @@ class ContactsController extends Controller
         return Redirect::back()->with('success', 'Contact updated.');
     }
 
-    public function destroy(Contact $contact): RedirectResponse
+    public function destroy(Contact $contact)
     {
         $contact->delete();
 
         return Redirect::back()->with('success', 'Contact deleted.');
     }
 
-    public function restore(Contact $contact): RedirectResponse
+    public function restore(Contact $contact)
     {
         $contact->restore();
 
