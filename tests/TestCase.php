@@ -7,6 +7,6 @@ use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 
 abstract class TestCase extends BaseTestCase
 {
-    // use CreatesApplication;
+    use CreatesApplication;
     use LazilyRefreshDatabase;  //wont hit db for every test case, only when required.sw
 }

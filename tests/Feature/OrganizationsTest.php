@@ -11,10 +11,12 @@ use Tests\TestCase;
 class OrganizationsTest extends TestCase
 {
     use RefreshDatabase;
+    protected $user;
 
     protected function setUp(): void
     {
         parent::setUp();
+
 
         $this->user = User::factory()->create([
             'account_id' => Account::create(['name' => 'Acme Corporation'])->id,
